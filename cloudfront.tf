@@ -1,10 +1,15 @@
+locals {
+  use_default_cert = var.custom_certificate_arn == null
+}
+
 resource "aws_cloudfront_distribution" "sharp_server_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
-  price_class         = "PriceClass_200"
+  price_class         = var.cloudfront_price_class
   comment             = "${var.name} CloudFront Distribution"
   tags                = var.tags
-  wait_for_deployment = false
+  wait_for_deployment = var.wait_for_deployment
+  aliases             = var.custom_domain_name == null ? [] : [var.custom_domain_name]
 
   origin {
     domain_name = replace(local.api_gateway_url, "https://", "")
@@ -33,9 +38,9 @@ resource "aws_cloudfront_distribution" "sharp_server_distribution" {
     }
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = var.sharp_server_cache_ttl
-    default_ttl            = var.sharp_server_cache_ttl
-    max_ttl                = var.sharp_server_cache_ttl
+    min_ttl                = var.cache_ttl
+    default_ttl            = var.cache_ttl
+    max_ttl                = var.cache_ttl
   }
 
   custom_error_response {
@@ -51,6 +56,9 @@ resource "aws_cloudfront_distribution" "sharp_server_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn            = local.use_default_cert ? null : var.custom_certificate_arn
+    minimum_protocol_version       = local.use_default_cert ? null : var.custom_certificate_protocol_version
+    ssl_support_method             = local.use_default_cert ? null : "sni-only"
+    cloudfront_default_certificate = local.use_default_cert
   }
 }

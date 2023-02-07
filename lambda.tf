@@ -10,11 +10,11 @@ resource "aws_lambda_function" "sharp_server_lambda" {
   source_code_hash = filebase64sha256(local.lambda_zip)
   runtime          = "nodejs16.x"
   timeout          = "30"
-  memory_size      = var.sharp_server_memory
+  memory_size      = var.memory
   environment {
     variables = {
       NODE_ENV  = "production"
-      LOG_LEVEL = "warn"
+      LOG_LEVEL = var.log_level
     }
   }
   tags = var.tags
