@@ -13,7 +13,7 @@ variable "tags" {
 variable "sharp_server_version" {
   description = "Sharp Server version"
   type        = string
-  default     = "0.2.0"
+  default     = "0.3.0"
 }
 
 variable "log_level" {
